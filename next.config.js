@@ -2,17 +2,17 @@ module.exports = {
   reactStrictMode: false,
   env: {
     project: {
-      name: 'pos',
+      name: 'nextjs-test',
       year: 2022
     },
     company: {
-      name: 'pos'
+      name: 'nextjs-test'
     },
     client: {
-      name: 'pos'
+      name: 'nextjs-test'
     },
     cookie: {
-      name: 'pos',
+      name: 'nextjs-test',
       password: '2gyZ3GDw3LHZQKDhPmPDL3sjREVRXPr8'
     },
     api: {
@@ -25,20 +25,20 @@ module.exports = {
       sizeLimit: '10mb',
     },
   },
-  // redirects: async () => {
-  //   return [
-  //     // {
-  //     //   source: '/auth',
-  //     //   destination: '/auth',
-  //     //   permanent: true,
-  //     // },
-  //     // {
-  //     //     source: '/',
-  //     //     destination: '/auth/login', // redirect root '/' path to '/login' path
-  //     //     permanent: true,
-  //     // },
-  //   ]
-  // },
+  redirects: async () => {
+    return [
+      {
+        source: '/',
+        destination: '/login',
+        permanent: true,
+      },
+      // {
+      //     source: '/',
+      //     destination: '/auth/login', // redirect root '/' path to '/login' path
+      //     permanent: true,
+      // },
+    ]
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback.fs = false;

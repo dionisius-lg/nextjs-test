@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Badge, Button, Dropdown, Form, Nav, NavDropdown } from "react-bootstrap";
+import { strTok } from "utils/general";
 import { useRouter } from "next/router";
 import fetchJson from "lib/fetchJson";
 import useUser from "lib/useUser";
@@ -21,7 +22,8 @@ export default function Navbar() {
                 <Dropdown as={Nav.Item}>
                     <Dropdown.Toggle as={Nav.Link} id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         {user?.isLoggedIn === true && (<>
-                            <i className="fas fa-user fa-fw" /> {user.login}
+                            <i className="fas fa-user fa-fw" />
+                            <span className="mx-1">{strTok(user.data.fullname)}</span>
                         </>)}
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-right" aria-labelledby="userDropdown">

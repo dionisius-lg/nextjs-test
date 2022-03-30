@@ -1,9 +1,9 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import fetchJson, { FetchError } from "lib/fetchJson";
 
-export const GeneralContext = createContext()
+export const GlobalContext = createContext()
 
-export const GeneralProvider = (props) => {
+export const GlobalProvider = (props) => {
     const [state, setState] = useState(false)
     
     const [user, setUser] = useState(false)
@@ -21,13 +21,13 @@ export const GeneralProvider = (props) => {
     }, [setUser])
 
     return (
-        <GeneralContext.Provider value={{
+        <GlobalContext.Provider value={{
             state,
             setState,
             user,
             setUser
         }}>
             {props.children}
-        </GeneralContext.Provider >
+        </GlobalContext.Provider >
     )
 }

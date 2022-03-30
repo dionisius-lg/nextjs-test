@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { Card, Modal, Form, Row, Col, Button, Spinner, Table } from "react-bootstrap";
-import MainLayout from "components/layouts/MainLayout";
-import fetchJson, { FetchError } from "lib/fetchJson";
-import { isEmptyValue } from "utils/general";
 import { AlertError, AlertSuccess, AlertWarning } from "components/Alert";
+import { isEmptyValue } from "utils/general";
+import fetchJson, { FetchError } from "lib/fetchJson";
+import MainLayout from "components/layouts/MainLayout";
 import FormAdd from "pages/users/add";
 import FormDetail from "pages/users/detail";
 
 export default function Users() {
     const [isLoading, setIsLoading] = useState(true)
+    const [isDeleting, setIsDeleting] = useState(false)
     const [alert, setAlert] = useState(initAlert)
     const [tableData, setTableData] = useState({})
     const [modalAdd, setModalAdd] = useState(initModal)
     const [modalDetail, setModalDetail] = useState(initModal)
+    const [modalDelete, setModalDelete] = useState(initModal)
     const [formFilter, setFormFilter] = useState({
         username: "",
         email: "",
@@ -38,7 +40,9 @@ export default function Users() {
 
     useEffect(() => {
         async function initFetch() {
-            await fetchJson(`/api/users?${new URLSearchParams(currentFilter)}`).then((res) => {
+            const params = `?${new URLSearchParams(currentFilter)}`
+
+            await fetchJson(`/api/users${params}`).then((res) => {
                 setTableData(res)
             }).catch((err) => {
                 if (err instanceof FetchError) {
@@ -72,11 +76,61 @@ export default function Users() {
         })
     }
 
+    const handleModalDelete = (id) => {
+        setModalDelete({
+            ...modalDelete,
+            show: !modalDelete.show,
+            dataId: id
+        })
+    }
+
     const handleModalClose = () => {
         setModalAdd(initModal)
         setModalDetail(initModal)
+        setModalDelete(initModal)
     }
-console.log(isLoading, 'isLoading')
+
+    const handleDelete = async (id) => {
+        setIsDeleting(true)
+
+        await fetchJson(`/api/users/${id}`, {
+            method: "DELETE"
+        }).then((res) => {
+            if (res.success) {
+                setAlert({
+                    title: "Success",
+                    message: "Data has been deleted.",
+                    show: true,
+                    type: "success"
+                })
+                setIsLoading(true)
+            } else {
+                setAlert({
+                    title: "Error",
+                    message: "Failed to delete data.",
+                    show: true,
+                    type: "error"
+                })
+            }
+        }).catch((err) => {
+            if (err instanceof FetchError) {
+                console.log(err.response)
+            } else {
+                console.log(err)
+            }
+
+            setAlert({
+                title: "Error",
+                message: "Failed to delete data.",
+                show: true,
+                type: "error"
+            })
+        })
+
+        setIsDeleting(false)
+        return handleModalClose()
+    }
+
     return (
         <>
             <MainLayout title="asd">
@@ -171,18 +225,21 @@ console.log(isLoading, 'isLoading')
                                 }
                                 {!isLoading && !isEmptyValue(tableData.data) &&
                                     tableData.data.map((row, i) => (
-                                        <tr key={ row.id }>
-                                            <td>{ tableData.paging.index[i] }</td>
-                                            <td>{ row.username }</td>
-                                            <td>{ row.email }</td>
-                                            <td>{ row.fullname }</td>
-                                            <td>{ row.birth_place }</td>
-                                            <td>{ row.birth_date }</td>
-                                            <td>{ row.phone }</td>
-                                            <td>{ String(row.is_active) === "1" ? "Yes" : "No" }</td>
+                                        <tr key={row.id}>
+                                            <td>{tableData.paging.index[i]}</td>
+                                            <td>{row.username}</td>
+                                            <td>{row.email}</td>
+                                            <td>{row.fullname}</td>
+                                            <td>{row.birth_place}</td>
+                                            <td>{row.birth_date}</td>
+                                            <td>{row.phone}</td>
+                                            <td>{String(row.is_active) === "1" ? "Yes" : "No"}</td>
                                             <td className="text-center">
                                                 <Button variant="warning" size="sm" className="m-1" title="Detail Data" onClick={(e) => { handleModalDetail(row.id) }}>
                                                     <i className="fas fa-edit fa-fw"></i>
+                                                </Button>
+                                                <Button variant="danger" size="sm" className="m-1" title="Delete Data" onClick={(e) => { handleModalDelete(row.id) }}>
+                                                    <i className="fas fa-trash fa-fw"></i>
                                                 </Button>
                                             </td>
                                         </tr>
@@ -227,6 +284,21 @@ console.log(isLoading, 'isLoading')
                     }}
                     dataId={modalDetail.dataId}
                 />
+            </Modal>
+
+            <Modal show={modalDelete.show} onHide={handleModalClose} backdrop="static" keyboard={false}>
+                <Modal.Header closeButton={isDeleting ? false : true}>
+                    <Modal.Title>Delete User</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure to delete this data?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" disabled={isDeleting} onClick={() => { handleDelete(modalDelete.dataId) }}>
+                        {isDeleting && <Spinner animation="border" size="sm" className="mr-1" />} Delete
+                    </Button>
+                    <Button variant="light" disabled={isDeleting} onClick={handleModalClose}>Close</Button>
+                </Modal.Footer>
             </Modal>
         </>
     )

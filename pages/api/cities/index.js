@@ -1,23 +1,21 @@
-import { useState, useEffect, useContext } from "react";
 import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
 import { sessionOptions } from "lib/session";
 import { PaginationInfo } from "utils/pagination";
 import { restApi } from "lib/restApi";
-import { isEmptyValue } from "utils/general";
+import { isEmptyValue, isJson } from "utils/general";
 import _ from "lodash";
 
 export default withIronSessionApiRoute(async (req, res) => {
     const { method } = req
-    const endpoint = '/provinces'
-    const result = {
-        success: false,
-        total_data: 0,
-        data: null
-    }
+    const result = { success: false, total_data: 0, data: null }
+    const endpoint = '/cities'
 
     switch (method) {
         case "GET":
-            return await Get({ req, res, endpoint, result })
+            return await GetData(req, res, endpoint, result)
+            break;
+        case "POST":
+            return await PostData(req, res, endpoint, result)
             break;
         default:
             return res.status(400).json(result)
@@ -25,7 +23,7 @@ export default withIronSessionApiRoute(async (req, res) => {
     }
 }, sessionOptions);
 
-const Get = async ({ req, res, endpoint, result }) => {
+const GetData = async (req, res, endpoint, result) => {
     const { method, query } = req
     let paging = {}
     let queryStr = ''
@@ -34,7 +32,7 @@ const Get = async ({ req, res, endpoint, result }) => {
     }
 
     if (!isEmptyValue(query) && _.isObject(query)) {
-        if ('id' in query && !_.isNaN(query['id'])) {
+        if (query.hasOwnProperty('id') && !_.isNaN(query['id'])) {
             const fetchApi = await restApi({ req, res, method, endpoint: `${endpoint}/${query['id']}` })
 
             if (fetchApi.response_code === 200) {
@@ -59,7 +57,7 @@ const Get = async ({ req, res, endpoint, result }) => {
     const fetchApi = await restApi({ req, res, method, endpoint: `${endpoint}?${queryStr}` })
 
     if (fetchApi.response_code === 200) {
-        if ('paging' in fetchApi) {
+        if (fetchApi.hasOwnProperty('paging') && !isEmptyValue(fetchApi['paging'])) {
             const pagingInfo = PaginationInfo({
                 total: fetchApi.total_data,
                 limit: queryObj.limit || 0,
@@ -79,6 +77,28 @@ const Get = async ({ req, res, endpoint, result }) => {
             data: fetchApi.data,
             limit: queryObj.limit,
             paging: paging
+        }
+    }
+
+    return res.status(fetchApi.response_code).json(result)
+}
+
+const PostData = async (req, res, endpoint, result) => {
+    const { method, body } = req
+
+    if (isEmptyValue(body) || !isJson(body)) {
+        return res.json(result)
+    }
+
+    const data = JSON.parse(body)
+    const fetchApi = await restApi({ req, res, method, endpoint, data })
+
+    if (fetchApi.response_code === 201) {
+        result = {
+            ...result,
+            success: true,
+            total_data: fetchApi.total_data,
+            data: fetchApi.data
         }
     }
 

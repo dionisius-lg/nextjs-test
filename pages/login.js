@@ -1,27 +1,23 @@
 import { useState, useEffect, useContext } from "react";
 import { Row, Col, Card, Form, Button, Spinner } from "react-bootstrap";
+import { AlertError, AlertSuccess, AlertWarning } from "components/Alert";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
+import { isEmptyValue } from "utils/general";
+import fetchJson, { FetchError } from "lib/fetchJson";
 import * as yup from "yup";
 import _ from "lodash";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import FrontLayout from "components/layouts/FrontLayout";
-import fetchJson, { FetchError } from "lib/fetchJson";
 import useUser from "lib/useUser";
-import { GeneralContext } from "contexts/General";
 
 export default function Login() {
-    // here we just check if user is already logged in and redirect to profile
     const { mutateUser } = useUser({
-        // redirectTo: "/profile-sg",
-        redirectTo: "/dashboard",
+        redirectTo: "/",
         redirectIfFound: true,
-    });
+    })
 
-    const [errorMsg, setErrorMsg] = useState(false);
-    const [inputs, setInputs] = useState(false);
-    const router = useRouter()
+    const [alert, setAlert] = useState(initAlert)
 
     const { handleSubmit, formState: { errors, isSubmitting }, register } = useForm({
         defaultValues: {
@@ -43,16 +39,27 @@ export default function Login() {
             mutateUser(
                 await fetchJson("/api/login", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    // headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(data),
                 })
             )
         } catch (err) {
             if (err instanceof FetchError) {
                 console.log(err.response)
-                setErrorMsg("Invalid credentials")
+                setAlert({
+                    title: "Error",
+                    message: "Invalid credentials",
+                    show: true,
+                    type: "error"
+                })
             } else {
                 console.error("An unexpected error happened:", err)
+                setAlert({
+                    title: "Error",
+                    message: "An unexpected error happened, please try again",
+                    show: true,
+                    type: "error"
+                })
             }
         }
     }
@@ -69,7 +76,24 @@ export default function Login() {
                                         <div className="text-center">
                                             <h1 className="h4 text-gray-900 mb-4">{process.env.project.name}</h1>
                                         </div>
-                                        {errorMsg && <div className="text-center text-danger">{errorMsg}</div>}
+                                        {alert.show && alert.type === 'error' && <AlertError
+                                            title={alert.title}
+                                            message={alert.message}
+                                            show={alert.show}
+                                            showChange={() => { setAlert(initAlert) }}
+                                        />}
+                                        {alert.show && alert.type === 'success' && <AlertSuccess
+                                            title={alert.title}
+                                            message={alert.message}
+                                            show={alert.show}
+                                            showChange={() => { setAlert(initAlert) }}
+                                        />}
+                                        {alert.show && alert.type === 'warning' && <AlertWarning
+                                            title={alert.title}
+                                            message={alert.message}
+                                            show={alert.show}
+                                            showChange={() => { setAlert(initAlert) }}
+                                        />}
                                         <Form className="user" onSubmit={handleSubmit(onSubmit)}>
                                             <Form.Group controlId="Username">
                                                 <Form.Control
@@ -112,4 +136,11 @@ export default function Login() {
             </Row>
         </FrontLayout>
     )
+}
+
+const initAlert = {
+    title: "",
+    message: "",
+    show: false,
+    type: null
 }

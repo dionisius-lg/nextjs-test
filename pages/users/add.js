@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Modal, Form, Row, Col, Button, Spinner } from "react-bootstrap";
-import fetchJson, { FetchError } from "lib/fetchJson";
-import { isEmptyValue } from "utils/general";
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { isEmptyValue } from "utils/general";
+import fetchJson, { FetchError } from "lib/fetchJson";
 import CustomSelect from "components/CustomSelect";
 import * as yup from "yup";
 import _ from "lodash";
@@ -121,7 +121,6 @@ export default function Add({ modalChange, alertChange, dataChange }) {
 
         await fetchJson(`/api/users`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.success) {
@@ -140,15 +139,22 @@ export default function Add({ modalChange, alertChange, dataChange }) {
                     type: "error"
                 })
             }
-
-            return modalChange()
         }).catch((err) => {
             if (err instanceof FetchError) {
                 console.log(err.response)
             } else {
                 console.log(err)
             }
+
+            alertChange({
+                title: "Error",
+                message: "Failed to save data.",
+                show: true,
+                type: "error"
+            })
         })
+
+        return modalChange()
     }
 
     return (

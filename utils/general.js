@@ -12,6 +12,22 @@ export const isEmptyValue = (value) => {
     )
 }
 
+export const isJson = (value) => {
+    value = typeof value !== "string" ? JSON.stringify(value) : value
+
+    try {
+        value = JSON.parse(value)
+    } catch (e) {
+        return false
+    }
+
+    if (typeof value === "object" && value !== null) {
+        return true
+    }
+
+    return false
+}
+
 export const formatDate = (value) => {
     const date = moment(value)
 
@@ -58,4 +74,21 @@ export const useLocalStorage = (key, initialValue) => {
 
 export const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+
+
+export const strTok = (string, separator = null) => {
+    if (isEmptyValue(separator)) {
+        separator = " "
+    }
+
+    const index = string.indexOf(separator);
+
+    if (index === -1) return false;
+
+    const token = string.substring(0, index);
+
+    string = string.substring(index + 1);
+
+    return token;
 }
