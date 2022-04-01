@@ -14,7 +14,7 @@ export default function Navbar() {
 
     return (
         <nav className="navbar sb-topnav navbar-expand navbar-dark bg-dark">
-            <a className="navbar-brand" href="index.html">POS</a>
+            <a className="navbar-brand" href="index.html">{process.env.project.name}</a>
             <Button variant="dark" size="sm" className="order-1 order-lg-0" id="sidebarToggle" onClick={toggleClass}>
                 <i className="fas fa-bars text-secondary"></i>
             </Button>

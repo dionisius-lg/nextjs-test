@@ -8,7 +8,7 @@ import _ from "lodash";
 export default withIronSessionApiRoute(async (req, res) => {
     const { method } = req
     const result = { success: false, total_data: 0, data: null }
-    const endpoint = '/cities'
+    const endpoint = '/product_categories'
 
     switch (method) {
         case "GET":

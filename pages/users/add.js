@@ -8,7 +8,7 @@ import CustomSelect from "components/CustomSelect";
 import * as yup from "yup";
 import _ from "lodash";
 
-export default function Add({ modalChange, alertChange, dataChange }) {
+export default function Add({ changeModal, changeAlert, changeData }) {
     const { handleSubmit, formState: {errors, isSubmitting }, control, register, reset, getValues } = useForm({
         defaultValues: initData,
         resolver: validationSchema
@@ -110,7 +110,7 @@ export default function Add({ modalChange, alertChange, dataChange }) {
         return () => setOptCities(initOptSelect)
     }, [provinceId])
 
-    const onSubmitForm = async (data, e) => {
+    const onSubmit = async (data, e) => {
         e.preventDefault()
 
         Object.keys(data).forEach((key) => {
@@ -124,15 +124,15 @@ export default function Add({ modalChange, alertChange, dataChange }) {
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.success) {
-                alertChange({
+                changeAlert({
                     title: "Success",
                     message: "Data has been saved.",
                     show: true,
                     type: "success"
                 })
-                dataChange()
+                changeData()
             } else {
-                alertChange({
+                changeAlert({
                     title: "Error",
                     message: "Failed to save data.",
                     show: true,
@@ -146,7 +146,7 @@ export default function Add({ modalChange, alertChange, dataChange }) {
                 console.log(err)
             }
 
-            alertChange({
+            changeAlert({
                 title: "Error",
                 message: "Failed to save data.",
                 show: true,
@@ -154,15 +154,15 @@ export default function Add({ modalChange, alertChange, dataChange }) {
             })
         })
 
-        return modalChange()
+        return changeModal()
     }
 
     return (
         <>
             <Modal.Header closeButton={isSubmitting ? false : true}>
-                <Modal.Title>Add User</Modal.Title>
+                <Modal.Title>Add Data</Modal.Title>
             </Modal.Header>
-            <Form onSubmit={handleSubmit(onSubmitForm)}>
+            <Form onSubmit={handleSubmit(onSubmit)}>
                 <Modal.Body className="pb-1">
                     <Row>
                         <Form.Group className="col-md-8">
@@ -305,7 +305,7 @@ export default function Add({ modalChange, alertChange, dataChange }) {
                     <Button variant="primary" type="submit" disabled={isSubmitting}>
                         {isSubmitting && <Spinner animation="border" size="sm" className="mr-1" />} Save
                     </Button>
-                    <Button variant="light" disabled={isSubmitting} onClick={modalChange}>Close</Button>
+                    <Button variant="light" disabled={isSubmitting} onClick={changeModal}>Close</Button>
                 </Modal.Footer>
             </Form>
         </>

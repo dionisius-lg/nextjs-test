@@ -32,11 +32,6 @@ module.exports = {
         destination: '/login',
         permanent: true,
       },
-      // {
-      //     source: '/',
-      //     destination: '/auth/login', // redirect root '/' path to '/login' path
-      //     permanent: true,
-      // },
     ]
   },
   webpack: (config, { isServer }) => {

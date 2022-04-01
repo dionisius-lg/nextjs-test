@@ -8,7 +8,7 @@ import CustomSelect from "components/CustomSelect";
 import * as yup from "yup";
 import _ from "lodash";
 
-export default function Detail({ modalChange, alertChange, dataChange, dataId  }) {
+export default function Detail({ changeModal, changeAlert, changeData, dataId  }) {
     const { handleSubmit, formState: { errors, isSubmitting }, control, register, reset, getValues } = useForm({
         defaultValues: initData,
         resolver: validationSchema
@@ -112,17 +112,13 @@ export default function Detail({ modalChange, alertChange, dataChange, dataId  }
 
     useEffect(() => {
         async function initFetch() {
-            let mapoptUserLevels = optUserLevels.map((row) => {
-                return row.value
-            })
-
             await fetchJson(`/api/users?id=${dataId}`).then((res) => {
                 if (!isEmptyValue(res.data)) {
                     reset({
                         ...initData,
                         username: res.data.username || "",
                         email: res.data.email || "",
-                        user_level_id: (mapoptUserLevels.includes(res.data.user_level_id)) ? res.data.user_level_id : "",
+                        user_level_id: res.data.user_level_id || "",
                         fullname: res.data.fullname || "",
                         birth_place: res.data.birth_place || "",
                         birth_date: res.data.birth_date || "",
@@ -147,7 +143,7 @@ export default function Detail({ modalChange, alertChange, dataChange, dataId  }
 
         if (!isEmptyValue(dataId)) return initFetch()
         return () => reset(initData)
-    }, [dataId, optUserLevels])
+    }, [dataId])
 
     const onSubmit = async (data, e) => {
         e.preventDefault()
@@ -163,15 +159,15 @@ export default function Detail({ modalChange, alertChange, dataChange, dataId  }
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.success) {
-                alertChange({
+                changeAlert({
                     title: "Success",
                     message: "Data has been updated.",
                     show: true,
                     type: "success"
                 })
-                dataChange()
+                changeData()
             } else {
-                alertChange({
+                changeAlert({
                     title: "Error",
                     message: "Failed to update data.",
                     show: true,
@@ -185,7 +181,7 @@ export default function Detail({ modalChange, alertChange, dataChange, dataId  }
                 console.log(err)
             }
 
-            alertChange({
+            changeAlert({
                 title: "Error",
                 message: "Failed to update data.",
                 show: true,
@@ -193,13 +189,13 @@ export default function Detail({ modalChange, alertChange, dataChange, dataId  }
             })
         })
 
-        return modalChange()
+        return changeModal()
     }
 
     return (
         <>
             <Modal.Header closeButton={isSubmitting ? false : true}>
-                <Modal.Title>Detail User</Modal.Title>
+                <Modal.Title>Detail Data</Modal.Title>
             </Modal.Header>
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Modal.Body className="pb-1">
@@ -346,7 +342,7 @@ export default function Detail({ modalChange, alertChange, dataChange, dataId  }
                     <Button variant="primary" type="submit" disabled={isSubmitting}>
                         {isSubmitting && <Spinner animation="border" size="sm" className="mr-1" />} Save
                     </Button>
-                    <Button variant="light" disabled={isSubmitting} onClick={modalChange}>Close</Button>
+                    <Button variant="light" disabled={isSubmitting} onClick={changeModal}>Close</Button>
                 </Modal.Footer>
             </Form>
         </>

@@ -52,10 +52,10 @@ export default function Sidebar() {
                                 Users
                             </a>
                         </ActiveLink>
-                        <ActiveLink activeClassName="active" href="/departments">
+                        <ActiveLink activeClassName="active" href="/products">
                             <a className="nav-link">
                                 <div className="sb-nav-link-icon"><i className="fas fa-building fa-fw"></i></div>
-                                Departments
+                                Products
                             </a>
                         </ActiveLink>
                     </div>
