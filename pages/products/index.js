@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, Modal, Form, Row, Col, Button, Spinner, Table } from "react-bootstrap";
 import { AlertError, AlertSuccess, AlertWarning } from "components/Alert";
 import { isEmptyValue } from "utils/general";
+import { withIronSessionSsr } from "iron-session/next";
+import { sessionOptions } from "lib/session";
 import fetchJson, { FetchError } from "lib/fetchJson";
 import MainLayout from "components/layouts/MainLayout";
 import CustomSelect from "components/CustomSelect";
@@ -356,6 +358,27 @@ export default function Products() {
         </>
     )
 }
+
+export const getServerSideProps = withIronSessionSsr(async ({ req, res }) => {
+    const user = req.session.user;
+
+    if (user === undefined) {
+        res.setHeader("location", "/login");
+        res.statusCode = 302;
+        res.end();
+        return {
+            props: {
+                user: { isLoggedIn: false },
+            },
+        };
+    }
+
+    return {
+        props: {
+            user: req.session.user
+        },
+    };
+}, sessionOptions);
 
 const initModal = {
     show: false,
