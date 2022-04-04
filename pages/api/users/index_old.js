@@ -1,10 +1,9 @@
-import { useState, useEffect, useContext } from "react";
-import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
-import { sessionOptions } from "lib/session";
-import { restApi } from "lib/restApi";
-import { PaginationInfo } from "utils/pagination";
-import { isEmptyValue } from "utils/general";
-import _ from "lodash";
+import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next"
+import { sessionOptions } from "lib/session"
+import { restApi } from "lib/restApi"
+import { PaginationInfo } from "utils/pagination"
+import { isEmptyValue } from "utils/general"
+import _ from "lodash"
 
 export default withIronSessionApiRoute(async (req, res) => {
     const { method } = req
@@ -18,18 +17,18 @@ export default withIronSessionApiRoute(async (req, res) => {
     switch (method) {
         case "GET":
             return await Get({ req, res, endpoint, result })
-            break;
+            break
         case "POST":
             return await Create({ req, res, endpoint, result })
-            break;
+            break
         case "PUT":
             return await Update({ req, res, endpoint, result })
-            break;
+            break
         default:
             return res.status(400).json(result)
-            break;
+            break
     }
-}, sessionOptions);
+}, sessionOptions)
 
 const Get = async ({ req, res, endpoint, result }) => {
     const { method, query } = req

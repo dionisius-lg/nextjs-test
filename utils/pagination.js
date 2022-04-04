@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo } from "react"
 
 export const PaginationDots = '...'
 
@@ -20,11 +20,11 @@ export const PaginationRange = ({ total = 0, limit = 1, current = 0, sibling = 1
             return range(1, totalPageCount)
         }
 
-        const leftSiblingIndex = Math.max(current - sibling, 1);
+        const leftSiblingIndex = Math.max(current - sibling, 1)
         const rightSiblingIndex = Math.min(
             current + sibling,
             totalPageCount
-        );
+        )
 
         // We do not want to show PaginationDots if there is only one position left 
         // after/before the left/right page count as that would lead to a change if our Pagination
@@ -36,7 +36,7 @@ export const PaginationRange = ({ total = 0, limit = 1, current = 0, sibling = 1
         const lastPageIndex = totalPageCount
 
         if (!shouldShowLeftDots && shouldShowRightDots) {
-            let leftItemCount = 3 + 2 * sibling;
+            let leftItemCount = 3 + 2 * sibling
             let leftRange = range(1, leftItemCount)
             
             return [...leftRange, PaginationDots, totalPageCount]
@@ -53,9 +53,9 @@ export const PaginationRange = ({ total = 0, limit = 1, current = 0, sibling = 1
         }
         
         if (shouldShowLeftDots && shouldShowRightDots) {
-            let middleRange = range(leftSiblingIndex, rightSiblingIndex);
+            let middleRange = range(leftSiblingIndex, rightSiblingIndex)
             
-            return [firstPageIndex, PaginationDots, ...middleRange, PaginationDots, lastPageIndex];
+            return [firstPageIndex, PaginationDots, ...middleRange, PaginationDots, lastPageIndex]
         }
     }, [total, limit, sibling, current])
 }

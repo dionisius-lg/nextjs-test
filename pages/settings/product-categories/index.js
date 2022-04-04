@@ -1,41 +1,52 @@
-import { useState, useEffect } from "react";
-import { Card, Modal, Form, Row, Col, Button, Spinner, Table } from "react-bootstrap";
-import { AlertError, AlertSuccess, AlertWarning } from "components/Alert";
-import { isEmptyValue } from "utils/general";
-import { withIronSessionSsr } from "iron-session/next";
-import { sessionOptions } from "lib/session";
-import fetchJson, { FetchError } from "lib/fetchJson";
-import MainLayout from "components/layouts/MainLayout";
-import Pagination from "components/Pagination";
-import FormAdd from "pages/users/add";
-import FormDetail from "pages/users/detail";
+import { useState, useEffect } from "react"
+import { Card, Modal, Form, Row, Col, Button, Spinner, Table } from "react-bootstrap"
+import { isEmptyValue } from "utils/general"
+import fetchJson, { FetchError } from "lib/fetchJson"
+import useUser from "lib/useUser"
+import useEvents from "lib/useEvents"
+import LoadingLayout from "components/layouts/LoadingLayout"
+import MainLayout from "components/layouts/MainLayout"
+import Notification from "components/Notification"
+import Pagination from "components/Pagination"
+import FormAdd from "pages/settings/product-categories/add"
+import FormDetail from "pages/settings/product-categories/detail"
 
-export default function Users() {
+
+export default function ProductCategories() {
     const [isLoading, setIsLoading] = useState(true)
     const [isDeleting, setIsDeleting] = useState(false)
-    const [alert, setAlert] = useState(initAlert)
     const [tableData, setTableData] = useState({})
+    const [notif, setNotif] = useState({
+        type: null,
+        message: "",
+        show: false
+    })
+
     const [modalAdd, setModalAdd] = useState(initModal)
     const [modalDetail, setModalDetail] = useState(initModal)
     const [modalDelete, setModalDelete] = useState(initModal)
-    const [formFilter, setFormFilter] = useState({
-        username: "",
-        email: "",
+
+    const [filter, setFilter] = useState({
+        name: "",
     })
+
     const [currentFilter, setCurrentFilter] = useState({
         page: 1,
-        order: "username",
-        ...formFilter
+        order: "name",
+        limit: 10,
+        ...filter
     })
-    const handleChangeFormFilter = (key, val) => {
-        setFormFilter({ ...formFilter, [key]: val })
+
+    const onChangeFilter = (key, val) => {
+        setFilter({ ...filter, [key]: val })
     }
-    const handleSubmitFormFilter = (e) => {
+
+    const onSubmitFilter = (e) => {
         e.preventDefault()
 
         setCurrentFilter({
             ...currentFilter,
-            ...formFilter,
+            ...filter,
             page: 1
         })
         setIsLoading(true)
@@ -45,7 +56,7 @@ export default function Users() {
         async function initFetch() {
             const params = `?${new URLSearchParams(currentFilter)}`
 
-            await fetchJson(`/api/users${params}`).then((res) => {
+            await fetchJson(`/api/product_categories${params}`).then((res) => {
                 setTableData(res)
             }).catch((err) => {
                 if (err instanceof FetchError) {
@@ -96,23 +107,21 @@ export default function Users() {
     const handleDelete = async (id) => {
         setIsDeleting(true)
 
-        await fetchJson(`/api/users/${id}`, {
+        await fetchJson(`/api/product_categories/${id}`, {
             method: "DELETE"
         }).then((res) => {
             if (res.success) {
-                setAlert({
-                    title: "Success",
+                setNotif({
+                    type: "success",
                     message: "Data has been deleted.",
-                    show: true,
-                    type: "success"
+                    show: true
                 })
                 setIsLoading(true)
             } else {
-                setAlert({
-                    title: "Error",
+                setNotif({
+                    type: "error",
                     message: "Failed to delete data.",
-                    show: true,
-                    type: "error"
+                    show: true
                 })
             }
         }).catch((err) => {
@@ -122,11 +131,10 @@ export default function Users() {
                 console.log(err)
             }
 
-            setAlert({
-                title: "Error",
+            setNotif({
+                type: "error",
                 message: "Failed to delete data.",
-                show: true,
-                type: "error"
+                show: true
             })
         })
 
@@ -134,53 +142,44 @@ export default function Users() {
         return handleModalClose()
     }
 
+    const { user } = useUser({ redirectTo: "/login" })
+    const { loadingEvents } = useEvents(user)
+
+    if (!user?.isLoggedIn || loadingEvents) {
+        return <LoadingLayout />
+    }
+
     return (
         <>
-            <MainLayout title="asd">
-                <h1 className="mt-4">Users</h1>
+            <MainLayout title="Product Categories">
+                <h1 className="mt-4">Product Categories</h1>
                 <ol className="breadcrumb mb-4">
                     <li className="breadcrumb-item"><a href="index.html">Settings</a></li>
-                    <li className="breadcrumb-item active">Users</li>
+                    <li className="breadcrumb-item active">Product Categories</li>
                 </ol>
-                {alert.show && alert.type === 'error' && <AlertError
-                    title={alert.title}
-                    message={alert.message}
-                    show={alert.show}
-                    showChange={() => { setAlert(initAlert) }}
-                />}
-                {alert.show && alert.type === 'success' && <AlertSuccess
-                    title={alert.title}
-                    message={alert.message}
-                    show={alert.show}
-                    showChange={() => { setAlert(initAlert) }}
-                />}
-                {alert.show && alert.type === 'warning' && <AlertWarning
-                    title={alert.title}
-                    message={alert.message}
-                    show={alert.show}
-                    showChange={() => { setAlert(initAlert) }}
+                {notif.show && <Notification
+                    type={notif.type}
+                    message={notif.message}
+                    show={notif.show}
+                    changeShow={() => setNotif({
+                        type: null,
+                        message: "",
+                        show: false
+                    })}
                 />}
                 <Card className="mb-4">
                     <Card.Header>
                         <i className="fas fa-table mr-1"></i> Filter Data
                     </Card.Header>
                     <Card.Body>
-                        <Form onSubmit={handleSubmitFormFilter}>
+                        <Form onSubmit={onSubmitFilter}>
                             <Form.Row>
                                 <Form.Group className="col-md-2">
-                                    <Form.Label>Username</Form.Label>
+                                    <Form.Label>Name</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        value={formFilter.username}
-                                        onChange={e => handleChangeFormFilter('username', e.target.value)}
-                                    />
-                                </Form.Group>
-                                <Form.Group className="col-md-2">
-                                    <Form.Label>Email</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={formFilter.email}
-                                        onChange={e => handleChangeFormFilter('email', e.target.value)}
+                                        value={filter.name}
+                                        onChange={e => onChangeFilter('name', e.target.value)}
                                     />
                                 </Form.Group>
                             </Form.Row>
@@ -200,12 +199,11 @@ export default function Users() {
                             <thead className="thead-dark">
                                 <tr>
                                     <th className="text-nowrap">No.</th>
-                                    <th className="text-nowrap">Username</th>
-                                    <th className="text-nowrap">Email</th>
-                                    <th className="text-nowrap">Fullname</th>
-                                    <th className="text-nowrap">Birth Place</th>
-                                    <th className="text-nowrap">Birth Date</th>
-                                    <th className="text-nowrap">Phone</th>
+                                    <th className="text-nowrap">Name</th>
+                                    <th className="text-nowrap">Create Date</th>
+                                    <th className="text-nowrap">Create User</th>
+                                    <th className="text-nowrap">Update Date</th>
+                                    <th className="text-nowrap">Update User</th>
                                     <th className="text-nowrap">Active</th>
                                     <th className="text-nowrap text-center">Action</th>
                                 </tr>
@@ -213,7 +211,7 @@ export default function Users() {
                             <tbody>
                                 {isLoading &&
                                     <tr>
-                                        <td colSpan="9" className="text-center">
+                                        <td colSpan="8" className="text-center">
                                             <Spinner animation="border" size="sm" className="mr-1" />
                                             Loading data...
                                         </td>
@@ -221,7 +219,7 @@ export default function Users() {
                                 }
                                 {!isLoading && isEmptyValue(tableData.data) &&
                                     <tr>
-                                        <td colSpan="9" className="text-center">
+                                        <td colSpan="8" className="text-center">
                                             <span className="text-danger">No data found</span>
                                         </td>
                                     </tr>
@@ -230,14 +228,13 @@ export default function Users() {
                                     tableData.data.map((row, i) => (
                                         <tr key={row.id}>
                                             <td>{tableData.paging.index[i]}</td>
-                                            <td>{row.username}</td>
-                                            <td>{row.email}</td>
-                                            <td>{row.fullname}</td>
-                                            <td>{row.birth_place}</td>
-                                            <td>{row.birth_date}</td>
-                                            <td>{row.phone}</td>
+                                            <td>{row.name}</td>
+                                            <td>{row.create_date}</td>
+                                            <td>{row.create_fullname}</td>
+                                            <td>{row.update_date}</td>
+                                            <td>{row.update_fullname}</td>
                                             <td>{String(row.is_active) === "1" ? "Yes" : "No"}</td>
-                                            <td className="text-center">
+                                            <td className="text-nowrap text-center">
                                                 <Button variant="warning" size="sm" className="m-1" title="Detail Data" onClick={(e) => { handleModalDetail(row.id) }}>
                                                     <i className="fas fa-edit fa-fw"></i>
                                                 </Button>
@@ -268,37 +265,19 @@ export default function Users() {
                 }
             </MainLayout>
 
-            <Modal show={modalAdd.show} onHide={handleModalClose} backdrop="static" keyboard={false} size="lg">
+            <Modal show={modalAdd.show} onHide={handleModalClose} backdrop="static" keyboard={false}>
                 <FormAdd
-                    changeModal={(params) => {
-                        handleModalClose()
-                    }}
-                    changeAlert={(params) => {
-                        setAlert({
-                            ...alert,
-                            ...params
-                        })
-                    }}
-                    changeData={() => {
-                        setIsLoading(true)
-                    }}
+                    changeModal={handleModalClose}
+                    changeNotif={(obj) => setNotif({ ...notif, ...obj })}
+                    changeData={() => setIsLoading(true)}
                 />
             </Modal>
 
-            <Modal show={modalDetail.show} onHide={handleModalClose} backdrop="static" keyboard={false} size="lg">
+            <Modal show={modalDetail.show} onHide={handleModalClose} backdrop="static" keyboard={false}>
                 <FormDetail
-                    changeModal={(params) => {
-                        handleModalClose()
-                    }}
-                    changeAlert={(params) => {
-                        setAlert({
-                            ...alert,
-                            ...params
-                        })
-                    }}
-                    changeData={() => {
-                        setIsLoading(true)
-                    }}
+                    changeModal={handleModalClose}
+                    changeNotif={(obj) => setNotif({ ...notif, ...obj })}
+                    changeData={() => setIsLoading(true)}
                     dataId={modalDetail.dataId}
                 />
             </Modal>
@@ -321,35 +300,12 @@ export default function Users() {
     )
 }
 
-export const getServerSideProps = withIronSessionSsr(async ({ req, res }) => {
-    const user = req.session.user;
-
-    if (user === undefined) {
-        res.setHeader("location", "/login");
-        res.statusCode = 302;
-        res.end();
-        return {
-            props: {
-                user: { isLoggedIn: false },
-            },
-        };
-    }
-
-    return {
-        props: {
-            user: req.session.user
-        },
-    };
-}, sessionOptions);
-
 const initModal = {
     show: false,
     dataId: null
 }
 
-const initAlert = {
-    title: "",
-    message: "",
-    show: false,
-    type: null
-}
+const initOptSelect = [{
+    value: "",
+    label: "Choose..."
+}]

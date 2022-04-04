@@ -1,15 +1,15 @@
-import { useState, useEffect, useContext } from "react";
-import { Row, Col, Card, Form, Button, Spinner } from "react-bootstrap";
-import { AlertError, AlertSuccess, AlertWarning } from "components/Alert";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { isEmptyValue } from "utils/general";
-import fetchJson, { FetchError } from "lib/fetchJson";
-import * as yup from "yup";
-import _ from "lodash";
-import Link from "next/link";
-import FrontLayout from "components/layouts/FrontLayout";
-import useUser from "lib/useUser";
+import { useState, useEffect, useContext } from "react"
+import { Row, Col, Card, Form, Button, Spinner } from "react-bootstrap"
+import { isEmptyValue } from "utils/general"
+import { useForm, Controller } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import fetchJson, { FetchError } from "lib/fetchJson"
+import useUser from "lib/useUser"
+import FrontLayout from "components/layouts/FrontLayout"
+import Notification from "components/Notification"
+import Link from "next/link"
+import * as yup from "yup"
+import _ from "lodash"
 
 export default function Login() {
     const { mutateUser } = useUser({
@@ -17,7 +17,11 @@ export default function Login() {
         redirectIfFound: true,
     })
 
-    const [alert, setAlert] = useState(initAlert)
+    const [notif, setNotif] = useState({
+        type: null,
+        message: "",
+        show: false
+    })
 
     const { handleSubmit, formState: { errors, isSubmitting }, register } = useForm({
         defaultValues: {
@@ -46,19 +50,17 @@ export default function Login() {
         } catch (err) {
             if (err instanceof FetchError) {
                 console.log(err.response)
-                setAlert({
-                    title: "Error",
+                setNotif({
+                    type: "error",
                     message: "Invalid credentials",
-                    show: true,
-                    type: "error"
+                    show: true
                 })
             } else {
                 console.error("An unexpected error happened:", err)
-                setAlert({
-                    title: "Error",
+                setNotif({
+                    type: "error",
                     message: "An unexpected error happened, please try again",
-                    show: true,
-                    type: "error"
+                    show: true
                 })
             }
         }
@@ -76,23 +78,15 @@ export default function Login() {
                                         <div className="text-center">
                                             <h1 className="h4 text-gray-900 mb-4">{process.env.project.name}</h1>
                                         </div>
-                                        {alert.show && alert.type === 'error' && <AlertError
-                                            title={alert.title}
-                                            message={alert.message}
-                                            show={alert.show}
-                                            showChange={() => { setAlert(initAlert) }}
-                                        />}
-                                        {alert.show && alert.type === 'success' && <AlertSuccess
-                                            title={alert.title}
-                                            message={alert.message}
-                                            show={alert.show}
-                                            showChange={() => { setAlert(initAlert) }}
-                                        />}
-                                        {alert.show && alert.type === 'warning' && <AlertWarning
-                                            title={alert.title}
-                                            message={alert.message}
-                                            show={alert.show}
-                                            showChange={() => { setAlert(initAlert) }}
+                                        {notif.show && <Notification
+                                            type={notif.type}
+                                            message={notif.message}
+                                            show={notif.show}
+                                            changeShow={() => setNotif({
+                                                type: null,
+                                                message: "",
+                                                show: false
+                                            })}
                                         />}
                                         <Form className="user" onSubmit={handleSubmit(onSubmit)}>
                                             <Form.Group controlId="Username">
@@ -136,11 +130,4 @@ export default function Login() {
             </Row>
         </FrontLayout>
     )
-}
-
-const initAlert = {
-    title: "",
-    message: "",
-    show: false,
-    type: null
 }

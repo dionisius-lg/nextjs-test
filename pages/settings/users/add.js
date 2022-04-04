@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { Modal, Form, Row, Col, Button, Spinner } from "react-bootstrap";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { isEmptyValue } from "utils/general";
-import fetchJson, { FetchError } from "lib/fetchJson";
-import CustomSelect from "components/CustomSelect";
-import * as yup from "yup";
-import _ from "lodash";
+import { useState, useEffect } from "react"
+import { Modal, Form, Row, Col, Button, Spinner } from "react-bootstrap"
+import { useForm, Controller } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { isEmptyValue } from "utils/general"
+import fetchJson, { FetchError } from "lib/fetchJson"
+import CustomSelect from "components/CustomSelect"
+import * as yup from "yup"
+import _ from "lodash"
 
-export default function Add({ changeModal, changeAlert, changeData }) {
+export default function Add({ changeModal, changeNotif, changeData }) {
     const { handleSubmit, formState: {errors, isSubmitting }, control, register, reset, getValues } = useForm({
         defaultValues: initData,
         resolver: validationSchema
@@ -124,19 +124,17 @@ export default function Add({ changeModal, changeAlert, changeData }) {
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.success) {
-                changeAlert({
-                    title: "Success",
+                changeNotif({
+                    type: "success",
                     message: "Data has been saved.",
-                    show: true,
-                    type: "success"
+                    show: true
                 })
                 changeData()
             } else {
-                changeAlert({
-                    title: "Error",
+                changeNotif({
+                    type: "error",
                     message: "Failed to save data.",
-                    show: true,
-                    type: "error"
+                    show: true
                 })
             }
         }).catch((err) => {
@@ -146,11 +144,10 @@ export default function Add({ changeModal, changeAlert, changeData }) {
                 console.log(err)
             }
 
-            changeAlert({
-                title: "Error",
+            changeNotif({
+                type: "error",
                 message: "Failed to save data.",
-                show: true,
-                type: "error"
+                show: true
             })
         })
 

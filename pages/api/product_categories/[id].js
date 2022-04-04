@@ -1,8 +1,8 @@
-import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
-import { sessionOptions } from "lib/session";
-import { restApi } from "lib/restApi";
-import { isEmptyValue, isJson } from "utils/general";
-import _ from "lodash";
+import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next"
+import { sessionOptions } from "lib/session"
+import { restApi } from "lib/restApi"
+import { isEmptyValue, isJson } from "utils/general"
+import _ from "lodash"
 
 export default withIronSessionApiRoute(async (req, res) => {
     const { method, query: {id} } = req
@@ -16,15 +16,15 @@ export default withIronSessionApiRoute(async (req, res) => {
     switch (method) {
         case "PUT":
             return await Update(req, res, endpoint, result)
-            break;
+            break
         case "DELETE":
             return await Delete(req, res, endpoint, result)
-            break;
+            break
         default:
             return res.status(400).json(result)
-            break;
+            break
     }
-}, sessionOptions);
+}, sessionOptions)
 
 const Update = async (req, res, endpoint, result) => {
     const { method, body, query: {id} } = req

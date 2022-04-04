@@ -1,12 +1,12 @@
-import { SWRConfig } from "swr";
-import NextNProgress from "nextjs-progressbar";
-import fetchJson from "lib/fetchJson";
-import { GlobalProvider } from "contexts/Global";
+import { SWRConfig } from "swr"
+import NextNProgress from "nextjs-progressbar"
+import fetchJson from "lib/fetchJson"
+import { GlobalProvider } from "contexts/Global"
 
-import "react-datepicker/dist/react-datepicker.css";
-import "public/vendor/fontawesome-free/css/all.min.css";
-import "public/assets/css/globals.css";
-import "public/assets/css/styles.css";
+import "react-datepicker/dist/react-datepicker.css"
+import "public/vendor/fontawesome-free/css/all.min.css"
+import "public/assets/css/globals.css"
+import "public/assets/css/styles.css"
 
 function MyApp({ Component, pageProps }) {
     return (
@@ -22,14 +22,14 @@ function MyApp({ Component, pageProps }) {
                 value={{
                     fetcher: fetchJson,
                     onError: (err) => {
-                        console.error(err);
+                        console.error(err)
                     },
                 }}
             >
                 <Component {...pageProps} />
             </SWRConfig>
         </GlobalProvider>
-    );
+    )
 }
 
-export default MyApp;
+export default MyApp

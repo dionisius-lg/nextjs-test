@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
-// import useSWR, { mutate, trigger } from "swr";
+import { useState, useEffect, useContext } from "react"
+import { Button, Form, Modal } from "react-bootstrap"
+// import useSWR, { mutate, trigger } from "swr"
 
-import Highcharts from "highcharts";
-import HighchartsExporting from "highcharts/modules/exporting";
-import HighchartsReact from "highcharts-react-official";
-import MainLayout from "components/layouts/MainLayout";
-import { useRouter } from "next/router";
+import Highcharts from "highcharts"
+import HighchartsExporting from "highcharts/modules/exporting"
+import HighchartsReact from "highcharts-react-official"
+import MainLayout from "components/layouts/MainLayout"
+import { useRouter } from "next/router"
 
-import useUser from "lib/useUser";
-import useEvents from "lib/useEvents";
+import useUser from "lib/useUser"
+import useEvents from "lib/useEvents"
 
-import { withIronSessionSsr } from "iron-session/next";
-import { sessionOptions } from "lib/session";
+import { withIronSessionSsr } from "iron-session/next"
+import { sessionOptions } from "lib/session"
 
 if (typeof Highcharts === 'object') {
     HighchartsExporting(Highcharts)
@@ -21,8 +21,8 @@ if (typeof Highcharts === 'object') {
 export default function Dashboard({ calls, call_statuses, user }) {
     // const { user } = useUser({
     //     redirectTo: "/login",
-    // });
-    // const { events } = useEvents(user);
+    // })
+    // const { events } = useEvents(user)
 
     const router = useRouter()
     const options = {
@@ -68,7 +68,7 @@ export default function Dashboard({ calls, call_statuses, user }) {
         },
         tooltip: {
             headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            pointFormat: '<tr><td style="color:{series.color}padding:0">{series.name}: </td>' +
                 '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
             footerFormat: '</table>',
             shared: true,
@@ -192,17 +192,17 @@ export default function Dashboard({ calls, call_statuses, user }) {
 }
 
 export const getServerSideProps = withIronSessionSsr(async ({ req, res }) => {
-    const user = req.session.user;
+    const user = req.session.user
 
     if (user === undefined) {
-        res.setHeader("location", "/login");
-        res.statusCode = 302;
-        res.end();
+        res.setHeader("location", "/login")
+        res.statusCode = 302
+        res.end()
         return {
             props: {
                 user: { isLoggedIn: false },
             },
-        };
+        }
     }
 
     return {
@@ -211,5 +211,5 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res }) => {
             // res: res,
             user: req.session.user
         },
-    };
-}, sessionOptions);
+    }
+}, sessionOptions)

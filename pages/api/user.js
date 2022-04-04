@@ -1,7 +1,7 @@
-import { withIronSessionApiRoute } from "iron-session/next";
-import { sessionOptions } from "lib/session";
+import { withIronSessionApiRoute } from "iron-session/next"
+import { sessionOptions } from "lib/session"
 
-export default withIronSessionApiRoute(userRoute, sessionOptions);
+export default withIronSessionApiRoute(userRoute, sessionOptions)
 
 async function userRoute(req, res) {
     if (req.session.user) {
@@ -10,12 +10,8 @@ async function userRoute(req, res) {
         res.json({
             ...req.session.user,
             isLoggedIn: true,
-        });
+        })
     } else {
-        res.json({
-            isLoggedIn: false,
-            login: "",
-            avatarUrl: "",
-        });
+        res.json({ isLoggedIn: false })
     }
 }

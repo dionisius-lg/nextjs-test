@@ -1,21 +1,26 @@
-import { useState, useEffect } from "react";
-import { Card, Modal, Form, Row, Col, Button, Spinner, Table } from "react-bootstrap";
-import { AlertError, AlertSuccess, AlertWarning } from "components/Alert";
-import { isEmptyValue } from "utils/general";
-import { withIronSessionSsr } from "iron-session/next";
-import { sessionOptions } from "lib/session";
-import fetchJson, { FetchError } from "lib/fetchJson";
-import MainLayout from "components/layouts/MainLayout";
-import CustomSelect from "components/CustomSelect";
-import Pagination from "components/Pagination";
-import FormAdd from "pages/products/add";
-import FormDetail from "pages/products/detail";
+import { useState, useEffect } from "react"
+import { Card, Modal, Form, Row, Col, Button, Spinner, Table } from "react-bootstrap"
+import { isEmptyValue } from "utils/general"
+import fetchJson, { FetchError } from "lib/fetchJson"
+import useUser from "lib/useUser"
+import useEvents from "lib/useEvents"
+import LoadingLayout from "components/layouts/LoadingLayout"
+import MainLayout from "components/layouts/MainLayout"
+import Notification from "components/Notification"
+import Pagination from "components/Pagination"
+import CustomSelect from "components/CustomSelect"
+import FormAdd from "pages/settings/products/add"
+import FormDetail from "pages/settings/products/detail"
 
 export default function Products() {
     const [isLoading, setIsLoading] = useState(true)
     const [isDeleting, setIsDeleting] = useState(false)
-    const [alert, setAlert] = useState(initAlert)
     const [tableData, setTableData] = useState({})
+    const [notif, setNotif] = useState({
+        type: null,
+        message: "",
+        show: false
+    })
 
     const [modalAdd, setModalAdd] = useState(initModal)
     const [modalDetail, setModalDetail] = useState(initModal)
@@ -138,19 +143,17 @@ export default function Products() {
             method: "DELETE"
         }).then((res) => {
             if (res.success) {
-                setAlert({
-                    title: "Success",
+                setNotif({
+                    type: "success",
                     message: "Data has been deleted.",
-                    show: true,
-                    type: "success"
+                    show: true
                 })
                 setIsLoading(true)
             } else {
-                setAlert({
-                    title: "Error",
+                setNotif({
+                    type: "error",
                     message: "Failed to delete data.",
-                    show: true,
-                    type: "error"
+                    show: true
                 })
             }
         }).catch((err) => {
@@ -160,11 +163,10 @@ export default function Products() {
                 console.log(err)
             }
 
-            setAlert({
-                title: "Error",
+            setNotif({
+                type: "error",
                 message: "Failed to delete data.",
-                show: true,
-                type: "error"
+                show: true
             })
         })
 
@@ -172,31 +174,30 @@ export default function Products() {
         return handleModalClose()
     }
 
+    const { user } = useUser({ redirectTo: "/login" })
+    const { loadingEvents } = useEvents(user)
+
+    if (!user?.isLoggedIn || loadingEvents) {
+        return <LoadingLayout />
+    }
+
     return (
         <>
-            <MainLayout title="asd">
+            <MainLayout title="Products">
                 <h1 className="mt-4">Products</h1>
                 <ol className="breadcrumb mb-4">
                     <li className="breadcrumb-item"><a href="index.html">Settings</a></li>
                     <li className="breadcrumb-item active">Products</li>
                 </ol>
-                {alert.show && alert.type === 'error' && <AlertError
-                    title={alert.title}
-                    message={alert.message}
-                    show={alert.show}
-                    showChange={() => { setAlert(initAlert) }}
-                />}
-                {alert.show && alert.type === 'success' && <AlertSuccess
-                    title={alert.title}
-                    message={alert.message}
-                    show={alert.show}
-                    showChange={() => { setAlert(initAlert) }}
-                />}
-                {alert.show && alert.type === 'warning' && <AlertWarning
-                    title={alert.title}
-                    message={alert.message}
-                    show={alert.show}
-                    showChange={() => { setAlert(initAlert) }}
+                {notif.show && <Notification
+                    type={notif.type}
+                    message={notif.message}
+                    show={notif.show}
+                    changeShow={() => setNotif({
+                        type: null,
+                        message: "",
+                        show: false
+                    })}
                 />}
                 <Card className="mb-4">
                     <Card.Header>
@@ -275,7 +276,7 @@ export default function Products() {
                                             <td>{row.update_date}</td>
                                             <td>{row.update_fullname}</td>
                                             <td>{String(row.is_active) === "1" ? "Yes" : "No"}</td>
-                                            <td className="text-center">
+                                            <td className="text-nowrap text-center">
                                                 <Button variant="warning" size="sm" className="m-1" title="Detail Data" onClick={(e) => { handleModalDetail(row.id) }}>
                                                     <i className="fas fa-edit fa-fw"></i>
                                                 </Button>
@@ -308,35 +309,17 @@ export default function Products() {
 
             <Modal show={modalAdd.show} onHide={handleModalClose} backdrop="static" keyboard={false}>
                 <FormAdd
-                    changeModal={(params) => {
-                        handleModalClose()
-                    }}
-                    changeAlert={(params) => {
-                        setAlert({
-                            ...alert,
-                            ...params
-                        })
-                    }}
-                    changeData={() => {
-                        setIsLoading(true)
-                    }}
+                    changeModal={handleModalClose}
+                    changeNotif={(obj) => setNotif({ ...notif, ...obj })}
+                    changeData={() => setIsLoading(true)}
                 />
             </Modal>
 
             <Modal show={modalDetail.show} onHide={handleModalClose} backdrop="static" keyboard={false}>
                 <FormDetail
-                    changeModal={(params) => {
-                        handleModalClose()
-                    }}
-                    changeAlert={(params) => {
-                        setAlert({
-                            ...alert,
-                            ...params
-                        })
-                    }}
-                    changeData={() => {
-                        setIsLoading(true)
-                    }}
+                    changeModal={handleModalClose}
+                    changeNotif={(obj) => setNotif({ ...notif, ...obj })}
+                    changeData={() => setIsLoading(true)}
                     dataId={modalDetail.dataId}
                 />
             </Modal>
@@ -359,37 +342,9 @@ export default function Products() {
     )
 }
 
-export const getServerSideProps = withIronSessionSsr(async ({ req, res }) => {
-    const user = req.session.user;
-
-    if (user === undefined) {
-        res.setHeader("location", "/login");
-        res.statusCode = 302;
-        res.end();
-        return {
-            props: {
-                user: { isLoggedIn: false },
-            },
-        };
-    }
-
-    return {
-        props: {
-            user: req.session.user
-        },
-    };
-}, sessionOptions);
-
 const initModal = {
     show: false,
     dataId: null
-}
-
-const initAlert = {
-    title: "",
-    message: "",
-    show: false,
-    type: null
 }
 
 const initOptSelect = [{

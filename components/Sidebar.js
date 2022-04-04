@@ -46,16 +46,22 @@ export default function Sidebar() {
                             </a>
                         </ActiveLink>
                         <div className="sb-sidenav-menu-heading">Settings</div>
-                        <ActiveLink activeClassName="active" href="/users">
+                        <ActiveLink activeClassName="active" href="/settings/users">
                             <a className="nav-link">
                                 <div className="sb-nav-link-icon"><i className="fas fa-user fa-fw"></i></div>
                                 Users
                             </a>
                         </ActiveLink>
-                        <ActiveLink activeClassName="active" href="/products">
+                        <ActiveLink activeClassName="active" href="/settings/products">
                             <a className="nav-link">
                                 <div className="sb-nav-link-icon"><i className="fas fa-building fa-fw"></i></div>
                                 Products
+                            </a>
+                        </ActiveLink>
+                        <ActiveLink activeClassName="active" href="/settings/product-categories">
+                            <a className="nav-link">
+                                <div className="sb-nav-link-icon"><i className="fas fa-building fa-fw"></i></div>
+                                Product Categories
                             </a>
                         </ActiveLink>
                     </div>

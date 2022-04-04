@@ -1,5 +1,5 @@
-import { useState } from "react";
-import moment from "moment";
+import { useState } from "react"
+import moment from "moment"
 
 export const isEmptyValue = (value) => {
     return (
@@ -82,13 +82,13 @@ export const strTok = (string, separator = null) => {
         separator = " "
     }
 
-    const index = string.indexOf(separator);
+    const index = string.indexOf(separator)
 
-    if (index === -1) return false;
+    if (index === -1) return false
 
-    const token = string.substring(0, index);
+    const token = string.substring(0, index)
 
-    string = string.substring(index + 1);
+    string = string.substring(index + 1)
 
-    return token;
+    return token
 }

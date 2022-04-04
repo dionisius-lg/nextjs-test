@@ -1,6 +1,6 @@
-import { withIronSessionApiRoute } from "iron-session/next";
-import { sessionOptions } from "lib/session";
-import { restApi } from "lib/restApi";
+import { withIronSessionApiRoute } from "iron-session/next"
+import { sessionOptions } from "lib/session"
+import { restApi } from "lib/restApi"
 
 export default withIronSessionApiRoute(async (req, res) => {
     const { method, body } = req
